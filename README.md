@@ -4,7 +4,7 @@
 
 ## Supported Databases
 
--   [postgreSql](https://www.postgresql.org/)
+-   [postgreSql](https://www.postgresql.org/) (v11,v12,v13,v14,v15)
 
 ## Third Party Library
 

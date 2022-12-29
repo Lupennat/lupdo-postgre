@@ -3,12 +3,40 @@ import { PostgressOptions } from '../../types';
 export const drivers: {
     [key: string]: PostgressOptions;
 } = {
-    postgres: {
+    postgres11: {
+        user: 'lupdo',
+        password: 'lupdos3cRet',
+        host: 'localhost',
+        database: 'test_db',
+        port: 25431
+    },
+    postgres12: {
         user: 'lupdo',
         password: 'lupdos3cRet',
         host: 'localhost',
         database: 'test_db',
         port: 25432
+    },
+    postgres13: {
+        user: 'lupdo',
+        password: 'lupdos3cRet',
+        host: 'localhost',
+        database: 'test_db',
+        port: 25433
+    },
+    postgres14: {
+        user: 'lupdo',
+        password: 'lupdos3cRet',
+        host: 'localhost',
+        database: 'test_db',
+        port: 25434
+    },
+    postgres15: {
+        user: 'lupdo',
+        password: 'lupdos3cRet',
+        host: 'localhost',
+        database: 'test_db',
+        port: 25435
     }
 };
 
