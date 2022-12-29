@@ -1,6 +1,6 @@
 import { Pdo } from 'lupdo';
 import { types } from 'pg';
-import PostgreDriver from './postgres-driver';
+import PostgresDriver from './postgres-driver';
 
 const toBigInt = (value: string): number | bigint => {
     const bigint = BigInt(value);
@@ -15,8 +15,8 @@ types.setTypeParser(20, toBigInt);
 const parseBigIntArray = types.getTypeParser(1016);
 types.setTypeParser(1016, a => parseBigIntArray(a).map(toBigInt));
 
-Pdo.addDriver('pg', PostgreDriver);
-Pdo.addDriver('pgsql', PostgreDriver);
+Pdo.addDriver('pg', PostgresDriver);
+Pdo.addDriver('pgsql', PostgresDriver);
 
-export { default as PostgreDriver } from './postgres-driver';
+export { default as PostgresDriver } from './postgres-driver';
 export * from './types';

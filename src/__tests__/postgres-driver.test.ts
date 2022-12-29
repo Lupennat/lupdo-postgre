@@ -11,6 +11,7 @@ import {
 } from 'lupdo';
 
 import { Client } from 'pg';
+import PostgresDriver from '../postgres-driver';
 import { pdoData } from './fixtures/config';
 
 describe('Postgres Driver', () => {
@@ -26,6 +27,31 @@ describe('Postgres Driver', () => {
 
     it('Works Driver Registration', () => {
         expect(Pdo.getAvailableDrivers()).toEqual(['pg', 'pgsql']);
+    });
+
+    it('Works Driver Notification', async () => {
+        const fnTestChannel = jest.fn();
+        const fnTestChannel2 = jest.fn();
+        const fnTestChannel3 = jest.fn();
+
+        expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(true);
+        expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(false);
+        expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(true);
+        expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(false);
+
+        expect(
+            PostgresDriver.subscribe('test_channel', message => {
+                expect(message.payload).toBe('test-executed!');
+            })
+        ).toBe(true);
+
+        await pdo.query('LISTEN test_channel');
+        await pdo.query(`NOTIFY test_channel, 'test-executed!'`);
+        expect(fnTestChannel).toBeCalledTimes(1);
+        expect(fnTestChannel2).toBeCalledTimes(0);
+        expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel)).toBe(true);
+        expect(PostgresDriver.unsubscribe('test_channel2', fnTestChannel2)).toBe(true);
+        expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel3)).toBe(false);
     });
 
     it('Works BeginTransaction Return Transaction', async () => {

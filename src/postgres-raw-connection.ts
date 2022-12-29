@@ -2,7 +2,7 @@
 import { PdoRawConnection } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
-import { Params, ValidBindings } from 'lupdo/dist/typings/types/pdo-prepared-statement';
+import { ArrayParams, Params, ValidBindings } from 'lupdo/dist/typings/types/pdo-prepared-statement';
 import PdoRowData from 'lupdo/dist/typings/types/pdo-raw-data';
 
 import { QueryArrayResult } from 'pg';
@@ -21,7 +21,7 @@ class PostgressRawConnection extends PdoRawConnection {
 
         if (index > -1 && this.selectResults.length > 0) {
             const value = this.selectResults[this.selectResults.length - 1][index];
-            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint') {
+            if (typeof value === 'string' || typeof value === 'bigint' || typeof value === 'number') {
                 return value;
             }
         }
@@ -29,15 +29,27 @@ class PostgressRawConnection extends PdoRawConnection {
         return null;
     }
 
+    protected logQuery(connection: PostgressPoolConnection, sql: string, params?: ArrayParams): void {
+        if (connection.__lupdo_postgres_debug) {
+            console.log(
+                `[postgress debug] processId: ${connection.processID} | query: ${sql} | params: `,
+                params ?? 'null'
+            );
+        }
+    }
+
     protected async doBeginTransaction(connection: PostgressPoolConnection): Promise<void> {
+        this.logQuery(connection, 'BEGIN');
         await connection.query('BEGIN');
     }
 
     protected async doCommit(connection: PostgressPoolConnection): Promise<void> {
+        this.logQuery(connection, 'COMMIT');
         await connection.query('COMMIT');
     }
 
     protected async doRollback(connection: PostgressPoolConnection): Promise<void> {
+        this.logQuery(connection, 'ROLLBACK');
         await connection.query('ROLLBACK');
     }
 
@@ -55,7 +67,7 @@ class PostgressRawConnection extends PdoRawConnection {
             statement = adapted.text;
             bindings = adapted.values;
         }
-
+        this.logQuery(connection, statement, bindings);
         return this.adaptResponse(
             await connection.query({
                 name: getUuidByString(statement, 5),
@@ -71,6 +83,7 @@ class PostgressRawConnection extends PdoRawConnection {
     }
 
     protected async doExec(connection: PostgressPoolConnection, sql: string): Promise<PdoAffectingData> {
+        this.logQuery(connection, sql);
         return this.adaptResponse(
             await connection.query({
                 rowMode: 'array',
@@ -83,6 +96,7 @@ class PostgressRawConnection extends PdoRawConnection {
         connection: PostgressPoolConnection,
         sql: string
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
+        this.logQuery(connection, sql);
         return this.adaptResponse(
             await connection.query({
                 rowMode: 'array',

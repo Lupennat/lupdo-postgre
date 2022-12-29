@@ -1,4 +1,4 @@
-import { ATTR_DEBUG, PdoConnectionI, PdoDriver, PdoRawConnectionI } from 'lupdo';
+import { ATTR_DEBUG, DEBUG_ENABLED, PdoConnectionI, PdoDriver, PdoRawConnectionI } from 'lupdo';
 import PdoAttributes from 'lupdo/dist/typings/types/pdo-attributes';
 import { PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
 import { Client, Notification } from 'pg';
@@ -7,7 +7,7 @@ import PostgressRawConnection from './postgres-raw-connection';
 import { PostgressOptions, PostgressPoolConnection } from './types';
 
 class PostgresDriver extends PdoDriver {
-    protected static notifiers: { [key: string]: ((message: Notification) => void)[] } = {};
+    protected static subscriptions: { [key: string]: ((message: Notification) => void)[] } = {};
 
     constructor(
         driver: string,
@@ -18,12 +18,29 @@ class PostgresDriver extends PdoDriver {
         super(driver, poolOptions, attributes);
     }
 
-    public static listen(channel: string, callable: (message: Notification) => void): void {
-        if (!(channel in PostgresDriver.notifiers)) {
-            PostgresDriver.notifiers[channel] = [];
+    public static subscribe(channel: string, callable: (message: Notification) => void): boolean {
+        if (!(channel in PostgresDriver.subscriptions)) {
+            PostgresDriver.subscriptions[channel] = [];
+        }
+        const findIndex = PostgresDriver.subscriptions[channel].findIndex(fn => fn === callable);
+        if (findIndex === -1) {
+            PostgresDriver.subscriptions[channel].push(callable);
+            return true;
         }
 
-        PostgresDriver.notifiers.channel.push(callable);
+        return false;
+    }
+
+    public static unsubscribe(channel: string, callable: (message: Notification) => void): boolean {
+        if (channel in PostgresDriver.subscriptions && PostgresDriver.subscriptions[channel].length) {
+            const findIndex = PostgresDriver.subscriptions[channel].findIndex(fn => fn === callable);
+            if (findIndex > -1) {
+                PostgresDriver.subscriptions[channel].splice(findIndex, 1);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected async createConnection(unsecure = false): Promise<PostgressPoolConnection> {
@@ -34,22 +51,22 @@ class PostgresDriver extends PdoDriver {
             postgresOptions.types = undefined;
         }
 
-        const client = new Client(postgresOptions);
+        const client = new Client(postgresOptions) as PostgressPoolConnection;
         if (!unsecure) {
-            if (debugMode) {
-                client.on('notice', msg => console.log('notice:', msg));
-            }
+            client.__lupdo_postgres_debug = debugMode === DEBUG_ENABLED;
 
             client.on('notification', (msg: Notification) => {
                 const channel = msg.channel;
-                for (const callable of PostgresDriver.notifiers[channel] ?? []) {
-                    callable(msg);
+                if (channel in PostgresDriver.subscriptions) {
+                    for (const callable of PostgresDriver.subscriptions[channel]) {
+                        callable(msg);
+                    }
                 }
             });
         }
 
         await client.connect();
-        return client as PostgressPoolConnection;
+        return client;
     }
 
     protected createPdoConnection(connection: PostgressPoolConnection): PdoConnectionI {

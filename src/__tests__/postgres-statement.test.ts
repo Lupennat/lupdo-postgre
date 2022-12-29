@@ -49,6 +49,7 @@ describe('Postgres Statement', () => {
         const id = stmt.fetchColumn(0).get() as number;
         expect(id).toBeGreaterThan(lastId);
         expect(await stmt.lastInsertId('id')).toBe(id);
+        expect(await stmt.lastInsertId('keynotfound')).toBeNull();
         await trx.rollback();
     });
 
