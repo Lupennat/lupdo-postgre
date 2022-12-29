@@ -1,3 +1,11 @@
+<p align="center">
+	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank"><img src="https://img.shields.io/npm/v/lupdo-postgres?color=0476bc&label=" alt="NPM version"></a>
+	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-postgres?color=3890aa&label="></a>
+    <a href="https://codecov.io/github/Lupennat/lupdo-postgres" >
+        <img src="https://codecov.io/github/Lupennat/lupdo-postgres/branch/main/graph/badge.svg?token=64B998KKDF"/>
+    </a>
+</p>
+
 # Lupdo-postgres
 
 [Lupdo](https://www.npmjs.com/package/lupdo) Driver For PostgreSql.
