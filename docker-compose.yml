@@ -1,0 +1,28 @@
+version: '3'
+services:
+    postgres:
+        image: postgres:13-alpine
+        command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+        ports:
+            - '25432:5432'
+        environment:
+            - PGUSER=ludpo
+            - PGPASSWORD=lupdos3cRet
+            - PGDATABASE=test_db
+            - POSTGRES_USER=lupdo
+            - POSTGRES_PASSWORD=lupdos3cRet
+            - POSTGRES_DB=test_db
+        volumes:
+            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+
+    waitpostgres:
+        image: postgres:13-alpine
+        links:
+            - postgres
+        depends_on:
+            - postgres
+        entrypoint:
+            - bash
+            - -c
+            - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres/test_db -c "SELECT 1"; do sleep 5; done'
+
