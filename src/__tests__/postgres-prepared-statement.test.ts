@@ -28,7 +28,7 @@ describe('Postgres Prepared Statement', () => {
     });
 
     it('Works Statement Prepared Statement Bind Numeric Value', async () => {
-        const stmt = await pdo.prepare('SELECT * FROM users limit $1;');
+        const stmt = await pdo.prepare('SELECT * FROM users limit ?;');
         stmt.bindValue(1, 3);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
@@ -58,7 +58,7 @@ describe('Postgres Prepared Statement', () => {
     });
 
     it('Works Statement Bind Value Fails With Mixed Values', async () => {
-        let stmt = await pdo.prepare('SELECT * FROM users where gender = $1 LIMIT :limit;');
+        let stmt = await pdo.prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
         stmt.bindValue(1, 'Cisgender male');
         expect(() => {
             stmt.bindValue('limit', 3);
@@ -66,7 +66,7 @@ describe('Postgres Prepared Statement', () => {
 
         await stmt.close();
 
-        stmt = await pdo.prepare('SELECT * FROM users where gender = $1 LIMIT :limit;');
+        stmt = await pdo.prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
         stmt.bindValue('limit', 3);
         expect(() => {
             stmt.bindValue(1, 'Cisgender male');
@@ -76,7 +76,7 @@ describe('Postgres Prepared Statement', () => {
     });
 
     it('Works Statement Execute With Numeric Value', async () => {
-        const stmt = await pdo.prepare('SELECT * FROM users limit $1;');
+        const stmt = await pdo.prepare('SELECT * FROM users limit ?;');
         await stmt.execute([3]);
         expect(stmt.fetchArray().all().length).toBe(3);
         expect(stmt.fetchArray().all().length).toBe(0);
@@ -108,7 +108,7 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT $1;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([1]);
         expect(stmt.fetchColumn(0).get()).toBe('1');
         await stmt.close();
@@ -120,20 +120,20 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT $1;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([BigInt(9007199254740994)]);
         expect(stmt.fetchColumn(0).get()).toBe('9007199254740994');
         await stmt.close();
     });
 
     it('Works Statement Bind Date', async () => {
-        let stmt = await pdo.prepare('SELECT * FROM companies WHERE opened > $1;');
+        let stmt = await pdo.prepare('SELECT * FROM companies WHERE opened > ?;');
         const date = new Date('2014-01-01');
         stmt.bindValue(1, date);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(10);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT $1');
+        stmt = await pdo.prepare('SELECT ?');
         await stmt.execute([date]);
 
         expect(new Date(stmt.fetchColumn(0).get() as string)).toEqual(date);
@@ -141,48 +141,46 @@ describe('Postgres Prepared Statement', () => {
     });
 
     it('Works Statement Bind Boolean', async () => {
-        let stmt = await pdo.prepare('SELECT * FROM companies where active = $1;');
+        let stmt = await pdo.prepare('SELECT * FROM companies where active = ?;');
         stmt.bindValue(1, false);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(5);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT $1;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([true]);
         expect(stmt.fetchColumn(0).get()).toEqual('1');
         await stmt.close();
     });
 
     it('Works Statement Bind String', async () => {
-        let stmt = await pdo.prepare('select id from users where name = $1;');
+        let stmt = await pdo.prepare('select id from users where name = ?;');
         stmt.bindValue(1, 'Edmund');
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(1);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT LOWER($1);');
+        stmt = await pdo.prepare('SELECT LOWER(?);');
         await stmt.execute(['Edmund']);
         expect(stmt.fetchColumn(0).get()).toEqual('edmund');
         await stmt.close();
     });
 
     it('Works Statement Buffer', async () => {
-        let stmt = await pdo.prepare('select $1');
+        let stmt = await pdo.prepare('select ?');
         const buffer = Buffer.from('Edmund');
         stmt.bindValue(1, buffer);
         await stmt.execute();
         expect(stmt.fetchColumn<Buffer>(0).get()?.toString()).toBe('Edmund');
         await stmt.close();
         const newBuffer = Buffer.from('buffer as blob on database');
-        stmt = await pdo.prepare(
-            'INSERT INTO companies (name, opened, active, "binary") VALUES($1,$2,$3,$4) returning *'
-        );
+        stmt = await pdo.prepare('INSERT INTO companies (name, opened, active, "binary") VALUES(?,?,?,?) returning *');
         await stmt.execute(['Test', '2000-12-26 00:00:00', 1, newBuffer]);
         const lastId = (await stmt.lastInsertId('id')) as number;
         await stmt.close();
-        stmt = await pdo.prepare('SELECT "binary" FROM companies WHERE id = $1;');
+        stmt = await pdo.prepare('SELECT "binary" FROM companies WHERE id = ?;');
         await stmt.execute([lastId]);
         expect(stmt.fetchColumn<Buffer>(0).get()?.toString()).toBe('buffer as blob on database');
         await stmt.close();
-        stmt = await pdo.prepare('SELECT id FROM companies WHERE "binary" = $1;');
+        stmt = await pdo.prepare('SELECT id FROM companies WHERE "binary" = ?;');
         await stmt.execute([Buffer.from('buffer as blob on database')]);
         expect(stmt.fetchColumn<number>(0).get()).toBe(lastId);
         await stmt.close();

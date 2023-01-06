@@ -63,15 +63,25 @@ By default Ludpo-sqlite overrides user connection options with this:
 
 ```ts
 {
-    types: undefined;
+    types: customParser;
 }
 ```
 
-Lupdo-postgres convert string for postgres bigint to number or bigint to preserve precision. [credits](https://github.com/brianc/node-pg-types/issues/78#issuecomment-538632724)
+Lupdo postgress has a custom type parser
+
+-   `boolean` are returned as number 1 or 0
+-   `int8` are returned as number or BigInt when necessary
+-   `bytea` are returned as Buffer
+-   all others types are always returned as string
+-   array are returned as Javascript `Array` of corresponding parsed type
 
 ## Postgres Named Parameter
 
 Lupdo-postgres support named parameter with syntax `:name`, through the package [yesql](https://github.com/pihvi/yesql)
+
+## Postgres Numeric Parameter
+
+Lupdo-postgres support numeric parameter with syntax `?` or native `$n`.
 
 ## Kill Connection
 
@@ -94,8 +104,8 @@ const testSubscription = message => {
     console.log(message);
 };
 
-PostgresDriver.subscribe('test_channel', message);
-PostgresDriver.unsubscribe('test_channel', message);
+PostgresDriver.subscribe('test_channel', testSubscription);
+PostgresDriver.unsubscribe('test_channel', testSubscription);
 ```
 
 message received is of type [Notification](https://node-postgres.com/apis/client#notification)

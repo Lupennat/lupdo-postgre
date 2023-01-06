@@ -1,13 +1,111 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS companies;
+DROP TABLE IF EXISTS types;
+DROP TABLE IF EXISTS types_array;
 DROP SEQUENCE IF EXISTS test_db_users_id_seq;
 DROP SEQUENCE IF EXISTS test_db_companies_id_seq;
+DROP SEQUENCE IF EXISTS types_serial_seq;
+DROP SEQUENCE IF EXISTS types_smallserial_seq;
+DROP SEQUENCE IF EXISTS types_bigserial_seq;
+DROP SEQUENCE IF EXISTS types_array_serial_seq;
+DROP SEQUENCE IF EXISTS types_array_smallserial_seq;
+DROP SEQUENCE IF EXISTS types_array_bigserial_seq;
 CREATE SEQUENCE test_db_users_id_seq;
 CREATE TABLE users (id BIGINT NOT NULL DEFAULT nextval('test_db_users_id_seq'),name VARCHAR(255) NOT NULL,gender VARCHAR(255) NOT NULL,PRIMARY KEY (id));
 ALTER SEQUENCE test_db_users_id_seq OWNED BY users.id;
 CREATE SEQUENCE test_db_companies_id_seq;
 CREATE TABLE companies (id INT NOT NULL DEFAULT nextval('test_db_companies_id_seq'),name VARCHAR(255) NULL,opened TIMESTAMP NOT NULL, active SMALLINT NOT NULL, "binary" BYTEA NULL, PRIMARY KEY (id));
 ALTER SEQUENCE test_db_companies_id_seq OWNED BY companies.id;
+CREATE TABLE types (
+    "serial" serial,
+    "smallserial" smallserial,
+    "bigserial" bigserial,
+    "int8" int8 NULL,
+    "bit" bit NULL,
+    "varbit" varbit NULL,
+    "boolean" boolean NULL,
+    "box" box NULL,
+    "bytea" bytea NULL,
+    "char" char NULL,
+    "varchar" varchar NULL,
+    "cidr" cidr NULL,
+    "circle" circle NULL,
+    "date" date NULL,
+    "double_precision" double precision NULL,
+    "inet" inet NULL,
+    "integer" integer NULL,
+    "interval" interval NULL,
+    "json" json NULL,
+    "jsonb" jsonb NULL,
+    "line" line NULL,
+    "lseg" lseg NULL,
+    "macaddr" macaddr NULL,
+    "macaddr8" macaddr8 NULL,
+    "money" money NULL,
+    "decimal" decimal(10,5) NULL,
+    "numeric" numeric(10,5) NULL,
+    "path" path NULL,
+    "pg_lsn" pg_lsn NULL,
+    "point" point NULL,
+    "polygon" polygon NULL,
+    "real" real NULL,
+    "smallint" smallint NULL,
+    "text" text NULL,
+    "time" time NULL,
+    "timetz" timetz NULL,
+    "timestamp" timestamp NULL,
+    "timestamptz" timestamptz NULL,
+    "tsquery" tsquery NULL,
+    "tsvector" tsvector NULL,
+    "txid_snapshot" txid_snapshot NULL,
+    "uuid" uuid NULL,
+    "xml" xml NULL
+);
+CREATE TABLE types_array (
+    "serial" serial,
+    "smallserial" smallserial,
+    "bigserial" bigserial,
+    "int8" int8[] NULL,
+    "bit" bit[] NULL,
+    "varbit" varbit[] NULL,
+    "boolean" boolean[] NULL,
+    "box" box[] NULL,
+    "bytea" bytea[] NULL,
+    "char" char[] NULL,
+    "varchar" varchar[] NULL,
+    "cidr" cidr[] NULL,
+    "circle" circle[] NULL,
+    "date" date[] NULL,
+    "double_precision" double precision[] NULL,
+    "inet" inet[] NULL,
+    "integer" integer[] NULL,
+    "interval" interval[] NULL,
+    "json" json[] NULL,
+    "jsonb" jsonb[] NULL,
+    "line" line[] NULL,
+    "lseg" lseg[] NULL,
+    "macaddr" macaddr[] NULL,
+    "macaddr8" macaddr8[] NULL,
+    "money" money[] NULL,
+    "decimal" decimal(10,5)[] NULL,
+    "numeric" numeric(10,5)[] NULL,
+    "path" path[] NULL,
+    "pg_lsn" pg_lsn[] NULL,
+    "point" point[] NULL,
+    "polygon" polygon[] NULL,
+    "real" real[] NULL,
+    "smallint" smallint[] NULL,
+    "text" text[] NULL,
+    "time" time[] NULL,
+    "timetz" timetz[] NULL,
+    "timestamp" timestamp[] NULL,
+    "timestamptz" timestamptz[] NULL,
+    "tsquery" tsquery[] NULL,
+    "tsvector" tsvector[] NULL,
+    "txid_snapshot" txid_snapshot[] NULL,
+    "uuid" uuid[] NULL,
+    "xml" xml[] NULL
+);
 INSERT INTO users (name, gender) VALUES ('Edmund','Multigender');
 INSERT INTO users (name, gender) VALUES ('Kyleigh','Cis man');
 INSERT INTO users (name, gender) VALUES ('Josefa','Cisgender male');
