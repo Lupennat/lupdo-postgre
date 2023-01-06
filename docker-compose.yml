@@ -13,7 +13,7 @@ services:
             - POSTGRES_PASSWORD=lupdos3cRet
             - POSTGRES_DB=test_db
         volumes:
-            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./src/__tests__/data/pg11.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres11:
         image: postgres:11-alpine
@@ -39,7 +39,7 @@ services:
             - POSTGRES_PASSWORD=lupdos3cRet
             - POSTGRES_DB=test_db
         volumes:
-            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./src/__tests__/data/pg11.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres12:
         image: postgres:12-alpine
@@ -65,7 +65,7 @@ services:
             - POSTGRES_PASSWORD=lupdos3cRet
             - POSTGRES_DB=test_db
         volumes:
-            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres13:
         image: postgres:13-alpine
@@ -91,7 +91,7 @@ services:
             - POSTGRES_PASSWORD=lupdos3cRet
             - POSTGRES_DB=test_db
         volumes:
-            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres14:
         image: postgres:14-alpine
@@ -117,7 +117,7 @@ services:
             - POSTGRES_PASSWORD=lupdos3cRet
             - POSTGRES_DB=test_db
         volumes:
-            - ./src/__tests__/data/pg.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres15:
         image: postgres:15-alpine

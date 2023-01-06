@@ -4,6 +4,7 @@ import { PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
 import { Client, Notification } from 'pg';
 import PostgresConnection from './postgres-connection';
 import PostgressRawConnection from './postgres-raw-connection';
+import types from './postgres-types-parser';
 import { PostgressOptions, PostgressPoolConnection } from './types';
 
 class PostgresDriver extends PdoDriver {
@@ -48,7 +49,7 @@ class PostgresDriver extends PdoDriver {
         const debugMode = this.getAttribute(ATTR_DEBUG) as number;
 
         if (!unsecure) {
-            postgresOptions.types = undefined;
+            postgresOptions.types = types;
         }
 
         const client = new Client(postgresOptions) as PostgressPoolConnection;

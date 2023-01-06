@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {
     ATTR_DEBUG,
     DEBUG_ENABLED,
@@ -70,7 +69,7 @@ describe('Postgres Driver', () => {
     });
 
     it('Works Exec Fails', async () => {
-        await expect(pdo.exec('SELECT $1')).rejects.toThrow(PdoError);
+        await expect(pdo.exec('SELECT ?')).rejects.toThrow(PdoError);
     });
 
     it('Works Query Return PdoStatement', async () => {
@@ -79,7 +78,7 @@ describe('Postgres Driver', () => {
     });
 
     it('Works Query Fails', async () => {
-        await expect(pdo.query('SELECT $1')).rejects.toThrow(PdoError);
+        await expect(pdo.query('SELECT ?')).rejects.toThrow(PdoError);
     });
 
     it('Works Prepare Return PdoPreparedStatement', async () => {
@@ -90,13 +89,13 @@ describe('Postgres Driver', () => {
     });
 
     it('Works Wrong PreparedStatement Fails on Execute', async () => {
-        const stmt = await pdo.prepare('SELECT $$1');
+        const stmt = await pdo.prepare('SELECT $?');
         await expect(stmt.execute([1])).rejects.toThrow(PdoError);
         await stmt.close();
     });
 
     it('Works Execute Fails', async () => {
-        const stmt = await pdo.prepare('SELECT $1 as spaccati');
+        const stmt = await pdo.prepare('SELECT ? as spaccati');
         await expect(stmt.execute([])).rejects.toThrow(PdoError);
         await stmt.close();
     });
@@ -110,7 +109,7 @@ describe('Postgres Driver', () => {
     it('Works Get Raw Driver Connection', async () => {
         const conn = await pdo.getRawDriverConnection<Client>();
         const res = await conn.query('SELECT * FROM users WHERE id = 1');
-        expect(res.rows[0]).toEqual({ id: 1, name: 'Edmund', gender: 'Multigender' });
+        expect(res.rows[0]).toEqual({ id: '1', name: 'Edmund', gender: 'Multigender' });
         await conn.end();
     });
 

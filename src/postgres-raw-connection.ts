@@ -2,25 +2,36 @@
 import { PdoRawConnection } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
-import { ArrayParams, Params, ValidBindings } from 'lupdo/dist/typings/types/pdo-prepared-statement';
+import { Params, ValidBindingsSingle } from 'lupdo/dist/typings/types/pdo-prepared-statement';
 import PdoRowData from 'lupdo/dist/typings/types/pdo-raw-data';
 
 import { QueryArrayResult } from 'pg';
 import getUuidByString from 'uuid-by-string';
 import yesql from 'yesql';
-import { PostgressPoolConnection } from './types';
+import { PdoPostgresAffectingData, PostgressPoolConnection } from './types';
+import { sqlQuestionMarkToNumericDollar } from './utils';
 
 class PostgressRawConnection extends PdoRawConnection {
-    protected isInsert = false;
-
-    public async lastInsertId(name?: string): Promise<string | number | bigint | null> {
-        if (name == null || !this.isInsert) {
-            return await super.lastInsertId();
+    public async lastInsertId(
+        {
+            selectResults,
+            columns,
+            affectingResults
+        }: {
+            affectingResults: PdoAffectingData;
+            selectResults: PdoRowData[];
+            columns: PdoColumnData[];
+        },
+        name?: string
+    ): Promise<string | number | bigint | null> {
+        if (name == null || (affectingResults as PdoPostgresAffectingData).command !== 'INSERT') {
+            return await super.lastInsertId({ affectingResults });
         }
-        const index = this.columns.findIndex(column => column.name.toLowerCase() === name.toLowerCase());
 
-        if (index > -1 && this.selectResults.length > 0) {
-            const value = this.selectResults[this.selectResults.length - 1][index];
+        const index = columns.findIndex(column => column.name.toLowerCase() === name.toLowerCase());
+
+        if (index > -1 && selectResults.length > 0) {
+            const value = selectResults[selectResults.length - 1][index];
             if (typeof value === 'string' || typeof value === 'bigint' || typeof value === 'number') {
                 return value;
             }
@@ -29,7 +40,7 @@ class PostgressRawConnection extends PdoRawConnection {
         return null;
     }
 
-    protected logQuery(connection: PostgressPoolConnection, sql: string, params?: ArrayParams): void {
+    protected logQuery(connection: PostgressPoolConnection, sql: string, params?: Params): void {
         if (connection.__lupdo_postgres_debug) {
             console.log(
                 `[postgress debug] processId: ${connection.processID} | query: ${sql} | params: `,
@@ -58,24 +69,30 @@ class PostgressRawConnection extends PdoRawConnection {
     }
 
     protected async executeStatement(
-        statement: string,
+        sql: string,
         bindings: Params,
         connection: PostgressPoolConnection
-    ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
+    ): Promise<[string, PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
+        sql = sqlQuestionMarkToNumericDollar(sql);
+
         if (!Array.isArray(bindings)) {
-            const adapted = yesql.pg(statement)(bindings);
-            statement = adapted.text;
+            const adapted = yesql.pg(sql)(bindings);
+            sql = adapted.text;
             bindings = adapted.values;
         }
-        this.logQuery(connection, statement, bindings);
-        return this.adaptResponse(
-            await connection.query({
-                name: getUuidByString(statement, 5),
-                rowMode: 'array',
-                text: statement,
-                values: bindings
-            })
-        );
+        this.logQuery(connection, sql, bindings);
+
+        return [
+            sql,
+            ...this.adaptResponse(
+                await connection.query({
+                    name: getUuidByString(sql, 5),
+                    rowMode: 'array',
+                    text: sql,
+                    values: bindings
+                })
+            )
+        ];
     }
 
     protected async closeStatement(): Promise<void> {
@@ -105,15 +122,16 @@ class PostgressRawConnection extends PdoRawConnection {
         );
     }
 
-    protected adaptResponse(result: QueryArrayResult): [PdoAffectingData, PdoRowData[], PdoColumnData[]] {
-        this.isInsert = result.command.toUpperCase() === 'INSERT';
+    protected adaptResponse(result: QueryArrayResult): [PdoPostgresAffectingData, PdoRowData[], PdoColumnData[]] {
         return [
             ['INSERT', 'UPDATE', 'DELETE'].includes(result.command.toUpperCase())
                 ? {
                       affectedRows: result.rowCount,
-                      lastInsertRowid: undefined
+                      command: result.command.toUpperCase()
                   }
-                : {},
+                : {
+                      command: result.command.toUpperCase()
+                  },
             result.rows,
             result.fields.map(field => {
                 return {
@@ -130,7 +148,7 @@ class PostgressRawConnection extends PdoRawConnection {
         ];
     }
 
-    protected adaptBindValue(value: ValidBindings): ValidBindings {
+    protected adaptBindValue(value: ValidBindingsSingle): ValidBindingsSingle {
         if (typeof value === 'boolean') {
             return Number(value);
         }
