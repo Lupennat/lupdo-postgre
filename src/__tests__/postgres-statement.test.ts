@@ -37,20 +37,31 @@ describe('Postgres Statement', () => {
 
     it('Works Statement Last Insert Id', async () => {
         const trx = await pdo.beginTransaction();
-        let stmt = await trx.query('SELECT * FROM users limit 5;');
 
-        expect(await stmt.lastInsertId()).toBe(null);
-        expect(await stmt.lastInsertId('id')).toBe(null);
-        stmt = await trx.query('SELECT count(*) as total from users');
+        let stmt = await trx.query('SELECT count(*) as total from users');
         const lastId = stmt.fetchColumn<number>(0).get() as number;
 
         stmt = await trx.query("INSERT INTO users (name, gender) VALUES ('Claudio', 'All') returning *;");
-        expect(await stmt.lastInsertId()).toBeNull();
-        const id = stmt.fetchColumn(0).get() as number;
-        expect(id).toBeGreaterThan(lastId);
-        expect(await stmt.lastInsertId('id')).toBe(id);
-        expect(await stmt.lastInsertId('keynotfound')).toBeNull();
+        expect(await stmt.lastInsertId()).toBeGreaterThan(lastId);
+        expect(await stmt.lastInsertId()).toBe(await stmt.lastInsertId('test_db_users_id_seq'));
+        expect(stmt.fetchColumn(0).get()).toBe(await stmt.lastInsertId());
         await trx.rollback();
+        await pdo.exec('CREATE TABLE test (id serial, name VARCHAR(255) NOT NULL);');
+        stmt = await pdo.query("INSERT INTO test (name) VALUES ('Test')");
+        expect(await stmt.lastInsertId()).toBe(1);
+        await pdo.exec('DROP TABLE test;');
+    });
+
+    it('Works Statement Last Insert Id Throw Error', async () => {
+        const pdo = new Pdo(pdoData.driver, pdoData.config);
+        const trx = await pdo.beginTransaction();
+        const stmt = await trx.query('SELECT * FROM users limit 5;');
+        await expect(stmt.lastInsertId()).rejects.toThrow('lastval is not yet defined in this session');
+        await expect(stmt.lastInsertId('test_db_users_id_seq')).rejects.toThrow(
+            'currval of sequence "test_db_users_id_seq" is not yet defined in this session, you can retrieve through the query "SELECT last_value FROM test_db_users_id_seq;"'
+        );
+        await trx.rollback();
+        await pdo.disconnect();
     });
 
     it('Works Statement Row Count', async () => {

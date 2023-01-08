@@ -172,9 +172,9 @@ describe('Postgres Prepared Statement', () => {
         expect(stmt.fetchColumn<Buffer>(0).get()?.toString()).toBe('Edmund');
         await stmt.close();
         const newBuffer = Buffer.from('buffer as blob on database');
-        stmt = await pdo.prepare('INSERT INTO companies (name, opened, active, "binary") VALUES(?,?,?,?) returning *');
+        stmt = await pdo.prepare('INSERT INTO companies (name, opened, active, "binary") VALUES(?,?,?,?)');
         await stmt.execute(['Test', '2000-12-26 00:00:00', 1, newBuffer]);
-        const lastId = (await stmt.lastInsertId('id')) as number;
+        const lastId = (await stmt.lastInsertId()) as number;
         await stmt.close();
         stmt = await pdo.prepare('SELECT "binary" FROM companies WHERE id = ?;');
         await stmt.execute([lastId]);
