@@ -167,6 +167,9 @@ describe('Postgres BigInt Cast', () => {
         expect(row.txid_snapshot).toBeNull();
         expect(row.uuid).toBeNull();
         expect(row.xml).toBeNull();
+        if (supportPgSnapshot()) {
+            expect(row.pg_snapshot).toBeNull();
+        }
 
         row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
         expect(row.int8).toBe(BigInt('-9223372036854775807'));
@@ -209,6 +212,9 @@ describe('Postgres BigInt Cast', () => {
         expect(row.txid_snapshot).toBe('5016429:5016429:');
         expect(row.uuid).toBe('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
         expect(row.xml).toBe('<?xml version="1.1"?><content>abc</content>');
+        if (supportPgSnapshot()) {
+            expect(row.pg_snapshot).toBe('5016429:5016429:');
+        }
 
         await pdo.disconnect();
     });

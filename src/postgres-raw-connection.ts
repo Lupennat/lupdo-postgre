@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { PdoRawConnection } from 'lupdo';
+import { PdoError, PdoRawConnection } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
 import { Params, ValidBindingsSingle } from 'lupdo/dist/typings/types/pdo-prepared-statement';
@@ -8,36 +8,34 @@ import PdoRowData from 'lupdo/dist/typings/types/pdo-raw-data';
 import { QueryArrayResult } from 'pg';
 import getUuidByString from 'uuid-by-string';
 import yesql from 'yesql';
-import { PdoPostgresAffectingData, PostgressPoolConnection } from './types';
+import { PostgressPoolConnection } from './types';
 import { sqlQuestionMarkToNumericDollar } from './utils';
 
 class PostgressRawConnection extends PdoRawConnection {
     public async lastInsertId(
         {
-            selectResults,
-            columns,
             affectingResults
         }: {
             affectingResults: PdoAffectingData;
-            selectResults: PdoRowData[];
-            columns: PdoColumnData[];
         },
         name?: string
     ): Promise<string | number | bigint | null> {
-        if (name == null || (affectingResults as PdoPostgresAffectingData).command !== 'INSERT') {
+        if (this.connection == null) {
             return await super.lastInsertId({ affectingResults });
         }
 
-        const index = columns.findIndex(column => column.name.toLowerCase() === name.toLowerCase());
-
-        if (index > -1 && selectResults.length > 0) {
-            const value = selectResults[selectResults.length - 1][index];
-            if (typeof value === 'string' || typeof value === 'bigint' || typeof value === 'number') {
-                return value;
+        try {
+            return await this.executeGetLastIdQuery(this.connection as PostgressPoolConnection, name);
+        } catch (error: any) {
+            if (name) {
+                throw new PdoError(
+                    `currval of sequence "${name}" is not yet defined in this session, you can retrieve through the query "SELECT last_value FROM ${name};"`,
+                    error
+                );
+            } else {
+                throw new PdoError(error);
             }
         }
-
-        return null;
     }
 
     protected logQuery(connection: PostgressPoolConnection, sql: string, params?: Params): void {
@@ -114,24 +112,43 @@ class PostgressRawConnection extends PdoRawConnection {
         sql: string
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
         this.logQuery(connection, sql);
-        return this.adaptResponse(
+        const [pdoAffectingData, ...rest] = this.adaptResponse(
             await connection.query({
                 rowMode: 'array',
                 text: sql
             })
         );
+        if (!this.inTransaction) {
+            try {
+                pdoAffectingData.lastInsertRowid = await this.executeGetLastIdQuery(connection);
+            } catch (error) {}
+        }
+        return [pdoAffectingData, ...rest];
     }
 
-    protected adaptResponse(result: QueryArrayResult): [PdoPostgresAffectingData, PdoRowData[], PdoColumnData[]] {
+    protected async executeGetLastIdQuery(
+        connection: PostgressPoolConnection,
+        name?: string
+    ): Promise<number | bigint> {
+        const sql = name ? 'SELECT CURRVAL($1)' : 'SELECT LASTVAL();';
+        const bindings = name ? [name] : [];
+        this.logQuery(connection, sql, bindings);
+        const res = await connection.query({
+            rowMode: 'array',
+            text: sql,
+            values: bindings
+        });
+        const row = res.rows.pop() as any[];
+        return row[0];
+    }
+
+    protected adaptResponse(result: QueryArrayResult): [PdoAffectingData, PdoRowData[], PdoColumnData[]] {
         return [
             ['INSERT', 'UPDATE', 'DELETE'].includes(result.command.toUpperCase())
                 ? {
-                      affectedRows: result.rowCount,
-                      command: result.command.toUpperCase()
+                      affectedRows: result.rowCount
                   }
-                : {
-                      command: result.command.toUpperCase()
-                  },
+                : {},
             result.rows,
             result.fields.map(field => {
                 return {

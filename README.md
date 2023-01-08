@@ -87,6 +87,33 @@ Lupdo-postgres support numeric parameter with syntax `?` or native `$n`.
 
 Lupdo-postgres support kill query.
 
+## Postgres Returing
+
+Lupdo-postgres support queries with `returning`, results can be fetched from statement.
+
+```ts
+const stmt = pdo.query("INSERT INTO users (name, gender) VALUES ('Claudio', 'All') returning *;");
+console.log(stmt.fetchArray().all())
+/*
+[
+    [33, 'Claudio', 'All']
+]
+*/
+```
+
+## Postgres lastInsertId
+
+When `pdo.query()` is executed outside a transaction, lupdo-postgres automatically try to fetch LastInsertId and if available and it will return last id when `stmt.lastInsertId()` is called.
+
+Lupdo-postgress can fetch LastInsertId on real-time when called inside a `transaction` or when statement is prepared through `pdo.prepare()`.\
+If you pass sequence name as parameter, it should retrieve current session value of sequence.
+
+> **Warning**
+> Calling `stmt.lastInsertId(name?)` inside a transaction or from a PreparedStatement, will raise an error if value is not defined inside current session.
+
+> **Note**
+> You should always get insert ID through [`insert returing`](#postgres-returing) syntax.
+
 ## Postgres Prepared Statement
 
 Postgres support [prepared statement](https://node-postgres.com/features/queries#prepared-statements) however, it requires that the statement be prepared only at first execution, which makes it impossible to intercept syntax errors in the query before it is executed.
