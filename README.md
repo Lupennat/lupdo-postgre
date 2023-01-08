@@ -103,7 +103,7 @@ console.log(stmt.fetchArray().all())
 
 ## Postgres lastInsertId
 
-When `pdo.query()` is executed outside a transaction, lupdo-postgres automatically try to fetch LastInsertId and if available and it will return last id when `stmt.lastInsertId()` is called.
+When `pdo.query()` is executed outside a transaction, lupdo-postgres automatically try to fetch LastInsertId and if available it will return last id when `stmt.lastInsertId()` is called.
 
 Lupdo-postgress can fetch LastInsertId on real-time when called inside a `transaction` or when statement is prepared through `pdo.prepare()`.\
 If you pass sequence name as parameter, it should retrieve current session value of sequence.
@@ -112,7 +112,7 @@ If you pass sequence name as parameter, it should retrieve current session value
 > Calling `stmt.lastInsertId(name?)` inside a transaction or from a PreparedStatement, will raise an error if value is not defined inside current session.
 
 > **Note**
-> You should always get insert ID through [`insert returing`](#postgres-returing) syntax.
+> You can always get insert ID through [`insert returing`](#postgres-returing) syntax.
 
 ## Postgres Prepared Statement
 
