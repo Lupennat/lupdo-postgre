@@ -75,6 +75,11 @@ Lupdo postgress has a custom type parser
 -   all others types are always returned as string
 -   array are returned as Javascript `Array` of corresponding parsed type
 
+## Parameters Binding
+
+Lupdo-postgres ignore type definition of `TypeBinding` parameter.\
+Lupdo-postgres support array of parameters.
+
 ## Postgres Named Parameter
 
 Lupdo-postgres support named parameter with syntax `:name`, through the package [yesql](https://github.com/pihvi/yesql)

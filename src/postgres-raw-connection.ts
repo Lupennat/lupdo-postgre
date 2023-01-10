@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { PdoError, PdoRawConnection } from 'lupdo';
+import { PdoError, PdoRawConnection, TypedBinding } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
 import { Params, ValidBindingsSingle } from 'lupdo/dist/typings/types/pdo-prepared-statement';
@@ -166,6 +166,10 @@ class PostgressRawConnection extends PdoRawConnection {
     }
 
     protected adaptBindValue(value: ValidBindingsSingle): ValidBindingsSingle {
+        if (value instanceof TypedBinding) {
+            return this.adaptBindValue(value.value);
+        }
+
         if (typeof value === 'boolean') {
             return Number(value);
         }
