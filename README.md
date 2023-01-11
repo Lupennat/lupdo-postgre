@@ -1,8 +1,15 @@
 <p align="center">
-	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank"><img src="https://img.shields.io/npm/v/lupdo-postgres?color=0476bc&label=" alt="NPM version"></a>
-	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-postgres?color=3890aa&label="></a>
-    <a href="https://codecov.io/github/Lupennat/lupdo-postgres" >
+	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
+        <img src="https://img.shields.io/npm/v/lupdo-postgres?color=0476bc&label=" alt="NPM version">
+    </a>
+	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
+        <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-postgres?color=3890aa&label=">
+    </a>
+    <a href="https://app.codecov.io/github/Lupennat/lupdo-postgres" target="__blank">
         <img src="https://codecov.io/github/Lupennat/lupdo-postgres/branch/main/graph/badge.svg?token=64B998KKDF"/>
+    </a>
+    <a href="https://snyk.io/test/github/lupennat/lupdo-postgres" target="__blank">
+        <img src="https://snyk.io/test/github/lupennat/lupdo-postgres/badge.svg">
     </a>
 </p>
 
