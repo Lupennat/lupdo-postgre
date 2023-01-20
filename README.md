@@ -32,14 +32,11 @@ Lupdo-postgres, under the hood, uses stable and performant npm packages:
 Base Example
 
 ```js
-const Pdo = require('lupdo');
-require('lupdo-postgres');
+const { createPostgresPdo } = require("lupdo-postgres");
 // ES6 or Typescrypt
-import Pdo from 'lupdo';
-import 'ludpo-postgres';
+import { createPostgresPdo } from 'ludpo-postgres';
 
-const pdo = new Pdo(
-    'pgsql',
+const pdo = createPostgresPdo(
     {
         host: 'localhost',
         port: 5432,
@@ -137,7 +134,9 @@ Prepared Statement require a unique-name for each prepared statement, under the 
 PostgresDriver expose two static method to subscribe/unsuscribe [notification](https://www.postgresql.org/docs/current/sql-notify.html)
 
 ```ts
-import PostgresDriver from 'lupdo-postgres';
+const { PostgresDriver } = require("lupdo-postgres");
+// ES6 or Typescrypt
+import { PostgresDriver } from 'ludpo-postgres';
 
 const testSubscription = message => {
     console.log(message);

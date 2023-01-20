@@ -10,6 +10,7 @@ import {
 } from 'lupdo';
 
 import { Client } from 'pg';
+import { createPostgresPdo } from '..';
 import PostgresDriver from '../postgres-driver';
 import { pdoData } from './fixtures/config';
 
@@ -136,6 +137,12 @@ describe('Postgres Driver', () => {
         const pdo = new Pdo(pdoData.driver, pdoData.config, {}, { [ATTR_DEBUG]: DEBUG_ENABLED });
         await pdo.query('SELECT 1');
         expect(console.log).toHaveBeenCalled();
+        await pdo.disconnect();
+    });
+
+    it('Works createPostgresPdo', async () => {
+        const pdo = createPostgresPdo(pdoData.config);
+        expect(pdo).toBeInstanceOf(Pdo);
         await pdo.disconnect();
     });
 });
