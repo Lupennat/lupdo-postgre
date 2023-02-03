@@ -45,14 +45,21 @@ class PostgresDriver extends PdoDriver {
     }
 
     protected async createConnection(unsecure = false): Promise<PostgressPoolConnection> {
+        let { host, port } = this.options;
         const { ...postgresOptions } = this.options;
         const debugMode = this.getAttribute(ATTR_DEBUG) as number;
+
+        if (Array.isArray(host)) {
+            const exploded = host[Math.floor(Math.random() * host.length)].split(':');
+            port = Number(exploded.pop() as string);
+            host = exploded.join(':');
+        }
 
         if (!unsecure) {
             postgresOptions.types = types;
         }
 
-        const client = new Client(postgresOptions) as PostgressPoolConnection;
+        const client = new Client({ ...postgresOptions, host: host, port: port }) as PostgressPoolConnection;
         if (!unsecure) {
             client.__lupdo_postgres_debug = debugMode === DEBUG_ENABLED;
 
