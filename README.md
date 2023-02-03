@@ -32,7 +32,7 @@ Lupdo-postgres, under the hood, uses stable and performant npm packages:
 Base Example
 
 ```js
-const { createPostgresPdo } = require("lupdo-postgres");
+const { createPostgresPdo } = require('lupdo-postgres');
 // ES6 or Typescrypt
 import { createPostgresPdo } from 'ludpo-postgres';
 
@@ -60,6 +60,9 @@ run();
 ## Driver Options
 
 [https://node-postgres.com/apis/client](https://node-postgres.com/apis/client)
+
+> **Note**
+> The `host` option also accepts a list of `host:port` the pool will generate the connection using a random host from the list.
 
 ## Pg Overrides
 
@@ -102,7 +105,7 @@ Lupdo-postgres support queries with `returning`, results can be fetched from sta
 
 ```ts
 const stmt = pdo.query("INSERT INTO users (name, gender) VALUES ('Claudio', 'All') returning *;");
-console.log(stmt.fetchArray().all())
+console.log(stmt.fetchArray().all());
 /*
 [
     [33, 'Claudio', 'All']
@@ -134,7 +137,7 @@ Prepared Statement require a unique-name for each prepared statement, under the 
 PostgresDriver expose two static method to subscribe/unsuscribe [notification](https://www.postgresql.org/docs/current/sql-notify.html)
 
 ```ts
-const { PostgresDriver } = require("lupdo-postgres");
+const { PostgresDriver } = require('lupdo-postgres');
 // ES6 or Typescrypt
 import { PostgresDriver } from 'ludpo-postgres';
 

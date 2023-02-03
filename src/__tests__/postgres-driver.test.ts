@@ -29,6 +29,16 @@ describe('Postgres Driver', () => {
         expect(Pdo.getAvailableDrivers()).toEqual(['pg', 'pgsql']);
     });
 
+    it('Works Random Host From List', async () => {
+        const config = pdoData.config;
+        config.host = [`${config.host}:${config.port}`, `${config.host}:${config.port}`];
+        config.port = undefined;
+        const pdo = new Pdo(pdoData.driver, config);
+        const stmt = await pdo.query('SELECT 1');
+        expect(stmt.fetchColumn(0).all()).toEqual([1]);
+        await pdo.disconnect();
+    });
+
     it('Works Driver Notification', async () => {
         const fnTestChannel = jest.fn();
         const fnTestChannel2 = jest.fn();
