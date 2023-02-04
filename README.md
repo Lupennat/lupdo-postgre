@@ -74,7 +74,7 @@ By default Ludpo-sqlite overrides user connection options with this:
 }
 ```
 
-Lupdo postgress has a custom type parser
+Lupdo postgres has a custom type parser
 
 -   `boolean` are returned as number 1 or 0
 -   `int8` are returned as number or BigInt when necessary
@@ -117,7 +117,7 @@ console.log(stmt.fetchArray().all());
 
 When `pdo.query()` is executed outside a transaction, lupdo-postgres automatically try to fetch LastInsertId and if available it will return last id when `stmt.lastInsertId()` is called.
 
-Lupdo-postgress can fetch LastInsertId on real-time when called inside a `transaction` or when statement is prepared through `pdo.prepare()`.\
+Lupdo-postgres can fetch LastInsertId on real-time when called inside a `transaction` or when statement is prepared through `pdo.prepare()`.\
 If you pass sequence name as parameter, it should retrieve current session value of sequence.
 
 > **Warning**

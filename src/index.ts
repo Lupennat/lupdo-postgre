@@ -3,13 +3,13 @@ import PostgresDriver from './postgres-driver';
 
 import PdoAttributes from 'lupdo/dist/typings/types/pdo-attributes';
 import { PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
-import { PostgressOptions } from './types';
+import { PostgresOptions } from './types';
 
 Pdo.addDriver('pg', PostgresDriver);
 Pdo.addDriver('pgsql', PostgresDriver);
 
 export function createPostgresPdo(
-    options: PostgressOptions,
+    options: PostgresOptions,
     poolOptions?: PoolOptions,
     attributes?: PdoAttributes
 ): Pdo {

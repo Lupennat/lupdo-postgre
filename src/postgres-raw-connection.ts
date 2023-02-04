@@ -8,10 +8,10 @@ import PdoRowData from 'lupdo/dist/typings/types/pdo-raw-data';
 import { QueryArrayResult } from 'pg';
 import getUuidByString from 'uuid-by-string';
 import yesql from 'yesql';
-import { PostgressPoolConnection } from './types';
+import { PostgresPoolConnection } from './types';
 import { sqlQuestionMarkToNumericDollar } from './utils';
 
-class PostgressRawConnection extends PdoRawConnection {
+class PostgresRawConnection extends PdoRawConnection {
     public async lastInsertId(
         {
             affectingResults
@@ -25,7 +25,7 @@ class PostgressRawConnection extends PdoRawConnection {
         }
 
         try {
-            return await this.executeGetLastIdQuery(this.connection as PostgressPoolConnection, name);
+            return await this.executeGetLastIdQuery(this.connection as PostgresPoolConnection, name);
         } catch (error: any) {
             if (name) {
                 throw new PdoError(
@@ -38,26 +38,26 @@ class PostgressRawConnection extends PdoRawConnection {
         }
     }
 
-    protected logQuery(connection: PostgressPoolConnection, sql: string, params?: Params): void {
+    protected logQuery(connection: PostgresPoolConnection, sql: string, params?: Params): void {
         if (connection.__lupdo_postgres_debug) {
             console.log(
-                `[postgress debug] processId: ${connection.processID} | query: ${sql} | params: `,
+                `[postgres debug] processId: ${connection.processID} | query: ${sql} | params: `,
                 params ?? 'null'
             );
         }
     }
 
-    protected async doBeginTransaction(connection: PostgressPoolConnection): Promise<void> {
+    protected async doBeginTransaction(connection: PostgresPoolConnection): Promise<void> {
         this.logQuery(connection, 'BEGIN');
         await connection.query('BEGIN');
     }
 
-    protected async doCommit(connection: PostgressPoolConnection): Promise<void> {
+    protected async doCommit(connection: PostgresPoolConnection): Promise<void> {
         this.logQuery(connection, 'COMMIT');
         await connection.query('COMMIT');
     }
 
-    protected async doRollback(connection: PostgressPoolConnection): Promise<void> {
+    protected async doRollback(connection: PostgresPoolConnection): Promise<void> {
         this.logQuery(connection, 'ROLLBACK');
         await connection.query('ROLLBACK');
     }
@@ -69,7 +69,7 @@ class PostgressRawConnection extends PdoRawConnection {
     protected async executeStatement(
         sql: string,
         bindings: Params,
-        connection: PostgressPoolConnection
+        connection: PostgresPoolConnection
     ): Promise<[string, PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
         sql = sqlQuestionMarkToNumericDollar(sql);
 
@@ -97,7 +97,7 @@ class PostgressRawConnection extends PdoRawConnection {
         return void 0;
     }
 
-    protected async doExec(connection: PostgressPoolConnection, sql: string): Promise<PdoAffectingData> {
+    protected async doExec(connection: PostgresPoolConnection, sql: string): Promise<PdoAffectingData> {
         this.logQuery(connection, sql);
         return this.adaptResponse(
             await connection.query({
@@ -108,7 +108,7 @@ class PostgressRawConnection extends PdoRawConnection {
     }
 
     protected async doQuery(
-        connection: PostgressPoolConnection,
+        connection: PostgresPoolConnection,
         sql: string
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
         this.logQuery(connection, sql);
@@ -126,10 +126,7 @@ class PostgressRawConnection extends PdoRawConnection {
         return [pdoAffectingData, ...rest];
     }
 
-    protected async executeGetLastIdQuery(
-        connection: PostgressPoolConnection,
-        name?: string
-    ): Promise<number | bigint> {
+    protected async executeGetLastIdQuery(connection: PostgresPoolConnection, name?: string): Promise<number | bigint> {
         const sql = name ? 'SELECT CURRVAL($1)' : 'SELECT LASTVAL();';
         const bindings = name ? [name] : [];
         this.logQuery(connection, sql, bindings);
@@ -178,4 +175,4 @@ class PostgressRawConnection extends PdoRawConnection {
     }
 }
 
-export default PostgressRawConnection;
+export default PostgresRawConnection;

@@ -1,7 +1,7 @@
-import { PostgressOptions } from '../../types';
+import { PostgresOptions } from '../../types';
 
 export const drivers: {
-    [key: string]: PostgressOptions;
+    [key: string]: PostgresOptions;
 } = {
     postgres11: {
         user: 'lupdo',
@@ -50,7 +50,7 @@ export function isDigitPrecision(): boolean {
     return ['postgres11'].includes(currentDB);
 }
 
-export const pdoData: { driver: string; config: PostgressOptions } = {
+export const pdoData: { driver: string; config: PostgresOptions } = {
     driver: 'pgsql',
     config: drivers[currentDB]
 };
