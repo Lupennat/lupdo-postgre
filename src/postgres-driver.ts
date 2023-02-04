@@ -3,16 +3,16 @@ import PdoAttributes from 'lupdo/dist/typings/types/pdo-attributes';
 import { PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
 import { Client, Notification } from 'pg';
 import PostgresConnection from './postgres-connection';
-import PostgressRawConnection from './postgres-raw-connection';
+import PostgresRawConnection from './postgres-raw-connection';
 import types from './postgres-types-parser';
-import { PostgressOptions, PostgressPoolConnection } from './types';
+import { PostgresOptions, PostgresPoolConnection } from './types';
 
 class PostgresDriver extends PdoDriver {
     protected static subscriptions: { [key: string]: ((message: Notification) => void)[] } = {};
 
     constructor(
         driver: string,
-        protected options: PostgressOptions,
+        protected options: PostgresOptions,
         poolOptions: PoolOptions,
         attributes: PdoAttributes
     ) {
@@ -44,7 +44,7 @@ class PostgresDriver extends PdoDriver {
         return false;
     }
 
-    protected async createConnection(unsecure = false): Promise<PostgressPoolConnection> {
+    protected async createConnection(unsecure = false): Promise<PostgresPoolConnection> {
         let { host, port } = this.options;
         const { ...postgresOptions } = this.options;
         const debugMode = this.getAttribute(ATTR_DEBUG) as number;
@@ -59,7 +59,7 @@ class PostgresDriver extends PdoDriver {
             postgresOptions.types = types;
         }
 
-        const client = new Client({ ...postgresOptions, host: host, port: port }) as PostgressPoolConnection;
+        const client = new Client({ ...postgresOptions, host: host, port: port }) as PostgresPoolConnection;
         if (!unsecure) {
             client.__lupdo_postgres_debug = debugMode === DEBUG_ENABLED;
 
@@ -77,16 +77,16 @@ class PostgresDriver extends PdoDriver {
         return client;
     }
 
-    protected createPdoConnection(connection: PostgressPoolConnection): PdoConnectionI {
+    protected createPdoConnection(connection: PostgresPoolConnection): PdoConnectionI {
         return new PostgresConnection(connection);
     }
 
-    protected async closeConnection(connection: PostgressPoolConnection): Promise<void> {
+    protected async closeConnection(connection: PostgresPoolConnection): Promise<void> {
         await connection.end();
         connection.removeAllListeners();
     }
 
-    protected async destroyConnection(connection: PostgressPoolConnection): Promise<void> {
+    protected async destroyConnection(connection: PostgresPoolConnection): Promise<void> {
         // get new connection to force kill pending
         const newConn = await this.createConnection();
         await newConn.query('SELECT pg_cancel_backend(' + connection.processID + ')');
@@ -101,7 +101,7 @@ class PostgresDriver extends PdoDriver {
     }
 
     public getRawConnection(): PdoRawConnectionI {
-        return new PostgressRawConnection(this.pool);
+        return new PostgresRawConnection(this.pool);
     }
 }
 
