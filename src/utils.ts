@@ -1,19 +1,44 @@
-export function sqlQuestionMarkToNumericDollar(sql: string): string {
-    let questionCount = 0;
-    sql = sql.replace(/\\?\?/g, match => {
-        if (match === '\\?') {
-            return '?';
-        }
-
-        questionCount += 1;
-        return `$${questionCount}`;
-    });
-
-    return sql;
-}
-
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { parse } = require('postgres-array');
+
+const MATCH_QUOTED = /('[^'\\]*(\\.[^'\\]*)*')/;
+const MATCH_DOUBLE_QUOTED = /("[^"\\]*(\\.[^"\\]*)*")/;
+
+export function sqlQuestionMarkToNumericDollar(sql: string): string {
+    let questionCount = 0;
+    return (
+        sql
+            // remove -- comments
+            .replace(/--.*$/gm, '')
+            // remove /* */ comments
+            .replace(/\/\*(\*(?!\/)|[^*])*\*\//g, '')
+            .split(MATCH_QUOTED)
+            .map(part => {
+                if (!part || MATCH_QUOTED.test(part)) {
+                    return part;
+                } else {
+                    return part
+                        .split(MATCH_DOUBLE_QUOTED)
+                        .map(part => {
+                            if (!part || MATCH_DOUBLE_QUOTED.test(part)) {
+                                return part;
+                            } else {
+                                return part.replace(/\?(\?)?/g, match => {
+                                    if (match === '??') {
+                                        return '?';
+                                    }
+                                    questionCount += 1;
+                                    return `$${questionCount}`;
+                                });
+                            }
+                        })
+                        .join('');
+                }
+            })
+            .join('')
+            .trim()
+    );
+}
 
 export function parseBigint(value: string | null): number | bigint | null {
     if (value === null) {
