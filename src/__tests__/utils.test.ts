@@ -12,7 +12,18 @@ import {
 describe('Utils', () => {
     it('Works Sql Question Mark To Numeric Dollar', () => {
         expect(sqlQuestionMarkToNumericDollar('SELECT ?,?,?,?')).toBe('SELECT $1,$2,$3,$4');
-        expect(sqlQuestionMarkToNumericDollar('SELECT \\?')).toBe('SELECT ?');
+        expect(sqlQuestionMarkToNumericDollar('SELECT "?,?,?,?"')).toBe('SELECT "?,?,?,?"');
+        expect(sqlQuestionMarkToNumericDollar('SELECT ??')).toBe('SELECT ?');
+        expect(sqlQuestionMarkToNumericDollar('SELECT "??"')).toBe('SELECT "??"');
+        expect(sqlQuestionMarkToNumericDollar("SELECT '??'")).toBe("SELECT '??'");
+        expect(
+            sqlQuestionMarkToNumericDollar(`-- SELECT '??'
+        select ?`)
+        ).toBe('select $1');
+        expect(sqlQuestionMarkToNumericDollar("/*SELECT '??' */ SELECT ?")).toBe('SELECT $1');
+        expect(sqlQuestionMarkToNumericDollar(`select * where t = 'string ?? ? " ? " '' ? ? '`)).toBe(
+            `select * where t = 'string ?? ? " ? " '' ? ? '`
+        );
     });
 
     it('Works Parse Bigint', () => {

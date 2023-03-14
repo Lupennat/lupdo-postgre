@@ -93,7 +93,7 @@ Lupdo-postgres support named parameter with syntax `:name`, through the package 
 
 ## Postgres Numeric Parameter
 
-Lupdo-postgres support numeric parameter with syntax `?` or native `$n`.
+Lupdo-postgres support numeric parameter with syntax `?`, you can escape it using syntax `??`.
 
 ## Kill Connection
 
