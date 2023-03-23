@@ -155,3 +155,20 @@ INSERT INTO companies (name, opened, active) VALUES ('Greenholt - Durgan', '2000
 INSERT INTO companies (name, opened, active) VALUES ('Hauck - Murazik', '2000-12-22 00:00:00', 0);
 INSERT INTO companies (name, opened, active) VALUES ('Beier and Sons', '1999-12-22 00:00:00', 0);
 INSERT INTO companies (name, opened, active) VALUES ('Harvey Inc', '2022-12-22 00:00:00', 1);
+
+CREATE TABLE geo_types (
+    "point" geometry(point) null,
+    "linestring" geometry(linestring) null,
+    "polygon" geometry(polygon) null,
+    "multipoint" geometry(multipoint) null,
+    "multilinestring" geometry(multilinestring) null,
+    "multipolygon" geometry(multipolygon) null,
+    "geometrycollection" geometry(geometrycollection) null,
+    "geo_point" geography(point, 4326) null,
+    "geo_linestring" geography(linestring, 4326) null,
+    "geo_polygon" geography(polygon, 4326) null,
+    "geo_multipoint" geography(multipoint, 4326) null,
+    "geo_multilinestring" geography(multilinestring, 4326) null,
+    "geo_multipolygon" geography(multipolygon, 4326) null,
+    "geo_geometrycollection" geography(geometrycollection, 4326) NULL
+);

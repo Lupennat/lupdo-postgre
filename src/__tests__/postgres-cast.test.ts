@@ -431,4 +431,69 @@ describe('Postgres BigInt Cast', () => {
 
         await pdo.disconnect();
     });
+
+    it('Works Geo Types', async () => {
+        const pdo = new Pdo(pdoData.driver, pdoData.config);
+        const stmt = await pdo.prepare(
+            'INSERT INTO geo_types (point,linestring,polygon,multipoint,multilinestring,multipolygon,geometrycollection,geo_point,geo_linestring,geo_polygon,geo_multipoint,geo_multilinestring,geo_multipolygon,geo_geometrycollection)' +
+                ' VALUES (ST_GeomFromText(?),ST_GeomFromText(?),ST_GeomFromText(?),ST_GeomFromText(?),ST_GeomFromText(?),ST_GeomFromText(?),ST_GeomFromText(?),ST_GeogFromText(?),ST_GeogFromText(?),ST_GeogFromText(?),ST_GeogFromText(?),ST_GeogFromText(?),ST_GeogFromText(?),ST_GeogFromText(?));'
+        );
+
+        await stmt.execute([null, null, null, null, null, null, null, null, null, null, null, null, null, null]);
+
+        await stmt.execute([
+            'POINT(1 1)',
+            'LINESTRING(0 0,1 1,2 2)',
+            'POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5))',
+            'MULTIPOINT(0 0, 20 20, 60 60)',
+            'MULTILINESTRING((10 10, 20 20), (15 15, 30 15))',
+            'MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0)),((5 5,7 5,7 7,5 7, 5 5)))',
+            'GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))',
+            'POINT(1 1)',
+            'LINESTRING(0 0,1 1,2 2)',
+            'POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5))',
+            'MULTIPOINT(0 0, 20 20, 60 60)',
+            'MULTILINESTRING((10 10, 20 20), (15 15, 30 15))',
+            'MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0)),((5 5,7 5,7 7,5 7, 5 5)))',
+            'GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))'
+        ]);
+
+        await stmt.close();
+
+        const query = await pdo.query(
+            'SELECT ST_AsText(point) as point,ST_AsText(linestring) as linestring,ST_AsText(polygon) as polygon,ST_AsText(multipoint) as multipoint,ST_AsText(multilinestring) as multilinestring,ST_AsText(multipolygon) as multipolygon,ST_AsText(geometrycollection) as geometrycollection,ST_AsText(geo_point) as geo_point,ST_AsText(geo_linestring) as geo_linestring,ST_AsText(geo_polygon) as geo_polygon,ST_AsText(geo_multipoint) as geo_multipoint,ST_AsText(geo_multilinestring) as geo_multilinestring,ST_AsText(geo_multipolygon) as geo_multipolygon,ST_AsText(geo_geometrycollection) as geo_geometrycollection FROM geo_types LIMIT 2;'
+        );
+
+        let row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
+        expect(row.point).toBeNull();
+        expect(row.linestring).toBeNull();
+        expect(row.polygon).toBeNull();
+        expect(row.multipoint).toBeNull();
+        expect(row.multilinestring).toBeNull();
+        expect(row.multipolygon).toBeNull();
+        expect(row.geometrycollection).toBeNull();
+        expect(row.geo_point).toBeNull();
+        expect(row.geo_linestring).toBeNull();
+        expect(row.geo_polygon).toBeNull();
+        expect(row.geo_multipoint).toBeNull();
+        expect(row.geo_multilinestring).toBeNull();
+        expect(row.geo_multipolygon).toBeNull();
+        expect(row.geo_geometrycollection).toBeNull();
+        row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
+        expect(row.point).toBe('POINT(1 1)');
+        expect(row.linestring).toBe('LINESTRING(0 0,1 1,2 2)');
+        expect(row.polygon).toBe('POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7,5 5))');
+        expect(row.multipoint).toBe('MULTIPOINT((0 0),(20 20),(60 60))');
+        expect(row.multilinestring).toBe('MULTILINESTRING((10 10,20 20),(15 15,30 15))');
+        expect(row.multipolygon).toBe('MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0)),((5 5,7 5,7 7,5 7,5 5)))');
+        expect(row.geometrycollection).toBe('GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))');
+        expect(row.geo_point).toBe('POINT(1 1)');
+        expect(row.geo_linestring).toBe('LINESTRING(0 0,1 1,2 2)');
+        expect(row.geo_polygon).toBe('POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7,5 5))');
+        expect(row.geo_multipoint).toBe('MULTIPOINT((0 0),(20 20),(60 60))');
+        expect(row.geo_multilinestring).toBe('MULTILINESTRING((10 10,20 20),(15 15,30 15))');
+        expect(row.geo_multipolygon).toBe('MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0)),((5 5,7 5,7 7,5 7,5 5)))');
+        expect(row.geo_geometrycollection).toBe('GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))');
+        await pdo.disconnect();
+    });
 });
