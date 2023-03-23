@@ -103,6 +103,15 @@ class PostgresDriver extends PdoDriver {
     public getRawConnection(): PdoRawConnectionI {
         return new PostgresRawConnection(this.pool);
     }
+
+    protected async getVersionFromConnection(connection: PostgresPoolConnection): Promise<string> {
+        const res = await connection.query<string[], string[]>({
+            rowMode: 'array',
+            text: 'SELECT VERSION() as version'
+        });
+
+        return res.rows[0][0];
+    }
 }
 
 export default PostgresDriver;

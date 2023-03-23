@@ -141,6 +141,21 @@ describe('Postgres Driver', () => {
         await pdo.disconnect();
     });
 
+    it('Work Get Version', async () => {
+        const pdo = createPostgresPdo(pdoData.config);
+        expect((await pdo.getVersion()).startsWith('PostgreSQL')).toBeTruthy();
+    });
+
+    it('Works Pdo Connection Version', async () => {
+        const pdo = createPostgresPdo(pdoData.config, {
+            created: (uuid, connection) => {
+                expect(connection.version.startsWith('PostgreSQL')).toBeTruthy();
+            }
+        });
+        await pdo.query('SELECT 1');
+        await pdo.disconnect();
+    });
+
     it('Works Debug', async () => {
         console.log = jest.fn();
         console.trace = jest.fn();
