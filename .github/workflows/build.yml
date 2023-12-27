@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [18.x, 16.x]
-        database-type: [crdb221, crdb222, crdb231, postgres12, postgres13, postgres14, postgres15]
+        database-type: [crdb221, crdb222, crdb231, postgres12, postgres13, postgres14, postgres15, postgres16]
 
     steps:
       - uses: actions/checkout@v3
