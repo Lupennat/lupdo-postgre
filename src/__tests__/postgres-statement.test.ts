@@ -48,7 +48,7 @@ describe('Postgres Statement', () => {
         await trx.rollback();
         await pdo.exec('CREATE TABLE test (id serial, name VARCHAR(255) NOT NULL);');
         stmt = await pdo.query("INSERT INTO test (name) VALUES ('Test')");
-        expect(await stmt.lastInsertId()).toBe(1);
+        expect(await stmt.lastInsertId()).toBeGreaterThanOrEqual(1);
         await pdo.exec('DROP TABLE test;');
     });
 

@@ -127,13 +127,12 @@ class PostgresRawConnection extends PdoRawConnection {
     }
 
     protected async executeGetLastIdQuery(connection: PostgresPoolConnection, name?: string): Promise<number | bigint> {
-        const sql = name ? 'SELECT CURRVAL($1)' : 'SELECT LASTVAL();';
-        const bindings = name ? [name] : [];
-        this.logQuery(connection, sql, bindings);
+        const sql = name ? `SELECT CURRVAL('${name}')` : 'SELECT LASTVAL();';
+        this.logQuery(connection, sql, []);
         const res = await connection.query({
             rowMode: 'array',
             text: sql,
-            values: bindings
+            values: []
         });
         const row = res.rows.pop() as any[];
         return row[0];
@@ -143,7 +142,7 @@ class PostgresRawConnection extends PdoRawConnection {
         return [
             ['INSERT', 'UPDATE', 'DELETE'].includes(result.command.toUpperCase())
                 ? {
-                      affectedRows: result.rowCount
+                      affectedRows: result.rowCount ?? undefined
                   }
                 : {},
             result.rows,

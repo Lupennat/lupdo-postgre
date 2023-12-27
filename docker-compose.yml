@@ -1,33 +1,91 @@
 version: '3'
-services:
-    postgres11:
-        image: postgis/postgis:11-3.3-alpine
-        command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+services: 
+    crdb221:
+        image: cockroachdb/cockroach:latest-v22.1
         ports:
-            - '25431:5432'
+            - "26258:26257"
+            - "8085:8080"
+        command: start-single-node --insecure
         environment:
-            - PGUSER=ludpo
-            - PGPASSWORD=lupdos3cRet
-            - PGDATABASE=test_db
-            - POSTGRES_USER=lupdo
-            - POSTGRES_PASSWORD=lupdos3cRet
-            - POSTGRES_DB=test_db
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
         volumes:
-            - ./src/__tests__/data/pg11.sql:/docker-entrypoint-initdb.d/init.sql
-
-    waitpostgres11:
-        image: postgis/postgis:11-3.3-alpine
+            - ./src/__tests__/data/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+    
+    waitcrdb221:
+        image: cockroachdb/cockroach:latest-v22.1
         links:
-            - postgres11
+            - crdb221
         depends_on:
-            - postgres11
+            - crdb221
+        environment:
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
+            - COCKROACH_HOST=crdb221
+            - COCKROACH_INSECURE=true
         entrypoint:
             - bash
             - -c
-            - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres11/test_db -c "SELECT 1"; do sleep 5; done'
+            - 'until cockroach sql --execute "SELECT 1"; do sleep 5; done'
+
+    crdb222:
+        image: cockroachdb/cockroach:latest-v22.2
+        ports:
+            - "26259:26257"
+            - "8086:8080"
+        command: start-single-node --insecure
+        environment:
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
+        volumes:
+            - ./src/__tests__/data/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+    
+    waitcrdb222:
+        image: cockroachdb/cockroach:latest-v22.2
+        links:
+            - crdb222
+        depends_on:
+            - crdb222
+        environment:
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
+            - COCKROACH_HOST=crdb222
+            - COCKROACH_INSECURE=true
+        entrypoint:
+            - bash
+            - -c
+            - 'until cockroach sql --execute "SELECT 1"; do sleep 5; done'
+
+    crdb231:
+        image: cockroachdb/cockroach:latest-v23.1
+        ports:
+            - "26260:26257"
+            - "8087:8080"
+        command: start-single-node --insecure
+        environment:
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
+        volumes:
+            - ./src/__tests__/data/crdb23.sql:/docker-entrypoint-initdb.d/init.sql
+    
+    waitcrdb231:
+        image: cockroachdb/cockroach:latest-v23.1
+        links:
+            - crdb231
+        depends_on:
+            - crdb231
+        environment:
+            - COCKROACH_DATABASE=test_db
+            - COCKROACH_USER=lupdo
+            - COCKROACH_HOST=crdb231
+            - COCKROACH_INSECURE=true
+        entrypoint:
+            - bash
+            - -c
+            - 'until cockroach sql --execute "SELECT 1"; do sleep 5; done'
 
     postgres12:
-        image: postgis/postgis:12-3.3-alpine
+        image: postgis/postgis:12-3.4-alpine
         command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
         ports:
             - '25432:5432'
@@ -42,7 +100,7 @@ services:
             - ./src/__tests__/data/pg11.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres12:
-        image: postgis/postgis:12-3.3-alpine
+        image: postgis/postgis:12-3.4-alpine
         links:
             - postgres12
         depends_on:
@@ -53,7 +111,7 @@ services:
             - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres12/test_db -c "SELECT 1"; do sleep 5; done'
 
     postgres13:
-        image: postgis/postgis:13-3.3-alpine
+        image: postgis/postgis:13-3.4-alpine
         command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
         ports:
             - '25433:5432'
@@ -68,7 +126,7 @@ services:
             - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres13:
-        image: postgis/postgis:13-3.3-alpine
+        image: postgis/postgis:13-3.4-alpine
         links:
             - postgres13
         depends_on:
@@ -79,7 +137,7 @@ services:
             - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres13/test_db -c "SELECT 1"; do sleep 5; done'
 
     postgres14:
-        image: postgis/postgis:14-3.3-alpine
+        image: postgis/postgis:14-3.4-alpine
         command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
         ports:
             - '25434:5432'
@@ -94,7 +152,7 @@ services:
             - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres14:
-        image: postgis/postgis:14-3.3-alpine
+        image: postgis/postgis:14-3.4-alpine
         links:
             - postgres14
         depends_on:
@@ -105,7 +163,7 @@ services:
             - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres14/test_db -c "SELECT 1"; do sleep 5; done'
 
     postgres15:
-        image: postgis/postgis:15-3.3-alpine
+        image: postgis/postgis:15-3.4-alpine
         command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
         ports:
             - '25435:5432'
@@ -120,7 +178,7 @@ services:
             - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
 
     waitpostgres15:
-        image: postgis/postgis:15-3.3-alpine
+        image: postgis/postgis:15-3.4-alpine
         links:
             - postgres15
         depends_on:
@@ -129,3 +187,29 @@ services:
             - bash
             - -c
             - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres15/test_db -c "SELECT 1"; do sleep 5; done'
+
+    postgres16:
+        image: postgis/postgis:16-3.4-alpine
+        command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+        ports:
+            - '25436:5432'
+        environment:
+            - PGUSER=ludpo
+            - PGPASSWORD=lupdos3cRet
+            - PGDATABASE=test_db
+            - POSTGRES_USER=lupdo
+            - POSTGRES_PASSWORD=lupdos3cRet
+            - POSTGRES_DB=test_db
+        volumes:
+            - ./src/__tests__/data/pg13.sql:/docker-entrypoint-initdb.d/init.sql
+
+    waitpostgres16:
+        image: postgis/postgis:16-3.4-alpine
+        links:
+            - postgres16
+        depends_on:
+            - postgres16
+        entrypoint:
+            - bash
+            - -c
+            - 'until /usr/local/bin/psql postgres://lupdo:lupdos3cRet@postgres16/test_db -c "SELECT 1"; do sleep 5; done'

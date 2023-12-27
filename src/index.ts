@@ -8,6 +8,9 @@ import { PostgresOptions } from './types';
 Pdo.addDriver('pg', PostgresDriver);
 Pdo.addDriver('pgsql', PostgresDriver);
 
+Pdo.addDriver('crdb', PostgresDriver);
+Pdo.addDriver('cockroachdb', PostgresDriver);
+
 export function createPostgresPdo(
     options: PostgresOptions,
     poolOptions?: PoolOptions,
