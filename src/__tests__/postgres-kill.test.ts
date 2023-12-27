@@ -1,5 +1,5 @@
 import { Pdo, PdoError } from 'lupdo';
-import { pdoData } from './fixtures/config';
+import { isCrdb, pdoData } from './fixtures/config';
 
 describe('Postgres Kill', () => {
     const sleep = (timeout: number): Promise<void> => {
@@ -34,8 +34,15 @@ describe('Postgres Kill', () => {
             }
         });
 
-        await expect(pdo.exec('SELECT pg_sleep(10);')).rejects.toThrow(PdoError);
-        await sleep(2000);
-        expect(Object.keys(events.killed).length).toBe(1);
+        if (isCrdb()) {
+            await expect(pdo.exec('SELECT pg_terminate_backend(10);')).rejects.toThrow(
+                'unknown function: pg_terminate_backend()'
+            );
+            await pdo.disconnect();
+        } else {
+            await expect(pdo.exec('SELECT pg_sleep(10);')).rejects.toThrow(PdoError);
+            await sleep(2000);
+            expect(Object.keys(events.killed).length).toBe(1);
+        }
     }, 10000);
 });

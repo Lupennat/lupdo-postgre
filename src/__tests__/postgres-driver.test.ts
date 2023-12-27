@@ -12,7 +12,7 @@ import {
 import { Client } from 'pg';
 import { createPostgresPdo } from '..';
 import PostgresDriver from '../postgres-driver';
-import { pdoData } from './fixtures/config';
+import { isCrdb, pdoData } from './fixtures/config';
 
 describe('Postgres Driver', () => {
     const pdo = new Pdo(pdoData.driver, pdoData.config);
@@ -26,7 +26,7 @@ describe('Postgres Driver', () => {
     });
 
     it('Works Driver Registration', () => {
-        expect(Pdo.getAvailableDrivers()).toEqual(['pg', 'pgsql']);
+        expect(Pdo.getAvailableDrivers()).toEqual(['pg', 'pgsql', 'crdb', 'cockroachdb']);
     });
 
     it('Works Random Host From List', async () => {
@@ -40,28 +40,32 @@ describe('Postgres Driver', () => {
     });
 
     it('Works Driver Notification', async () => {
-        const fnTestChannel = jest.fn();
-        const fnTestChannel2 = jest.fn();
-        const fnTestChannel3 = jest.fn();
+        if (isCrdb()) {
+            await expect(pdo.query('LISTEN test_channel')).rejects.toThrow();
+        } else {
+            const fnTestChannel = jest.fn();
+            const fnTestChannel2 = jest.fn();
+            const fnTestChannel3 = jest.fn();
 
-        expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(true);
-        expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(false);
-        expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(true);
-        expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(false);
+            expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(true);
+            expect(PostgresDriver.subscribe('test_channel', fnTestChannel)).toBe(false);
+            expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(true);
+            expect(PostgresDriver.subscribe('test_channel2', fnTestChannel2)).toBe(false);
 
-        expect(
-            PostgresDriver.subscribe('test_channel', message => {
-                expect(message.payload).toBe('test-executed!');
-            })
-        ).toBe(true);
+            expect(
+                PostgresDriver.subscribe('test_channel', message => {
+                    expect(message.payload).toBe('test-executed!');
+                })
+            ).toBe(true);
 
-        await pdo.query('LISTEN test_channel');
-        await pdo.query(`NOTIFY test_channel, 'test-executed!'`);
-        expect(fnTestChannel).toBeCalledTimes(1);
-        expect(fnTestChannel2).toBeCalledTimes(0);
-        expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel)).toBe(true);
-        expect(PostgresDriver.unsubscribe('test_channel2', fnTestChannel2)).toBe(true);
-        expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel3)).toBe(false);
+            await pdo.query('LISTEN test_channel');
+            await pdo.query(`NOTIFY test_channel, 'test-executed!'`);
+            expect(fnTestChannel).toBeCalledTimes(1);
+            expect(fnTestChannel2).toBeCalledTimes(0);
+            expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel)).toBe(true);
+            expect(PostgresDriver.unsubscribe('test_channel2', fnTestChannel2)).toBe(true);
+            expect(PostgresDriver.unsubscribe('test_channel', fnTestChannel3)).toBe(false);
+        }
     });
 
     it('Works BeginTransaction Return Transaction', async () => {
@@ -143,13 +147,21 @@ describe('Postgres Driver', () => {
 
     it('Work Get Version', async () => {
         const pdo = createPostgresPdo(pdoData.config);
-        expect((await pdo.getVersion()).startsWith('PostgreSQL')).toBeTruthy();
+        if (isCrdb()) {
+            expect((await pdo.getVersion()).startsWith('CockroachDB')).toBeTruthy();
+        } else {
+            expect((await pdo.getVersion()).startsWith('PostgreSQL')).toBeTruthy();
+        }
     });
 
     it('Works Pdo Connection Version', async () => {
         const pdo = createPostgresPdo(pdoData.config, {
             created: (uuid, connection) => {
-                expect(connection.version.startsWith('PostgreSQL')).toBeTruthy();
+                if (isCrdb()) {
+                    expect(connection.version.startsWith('CockroachDB')).toBeTruthy();
+                } else {
+                    expect(connection.version.startsWith('PostgreSQL')).toBeTruthy();
+                }
             }
         });
         await pdo.query('SELECT 1');

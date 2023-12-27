@@ -15,11 +15,12 @@
 
 # Lupdo-postgres
 
-[Lupdo](https://www.npmjs.com/package/lupdo) Driver For PostgreSql.
+[Lupdo](https://www.npmjs.com/package/lupdo) Driver For PostgreSql and CockroachDB.
 
 ## Supported Databases
 
--   [postgreSql](https://www.postgresql.org/) (v11,v12,v13,v14,v15)
+-   [postgreSql](https://www.postgresql.org/) (v12,v13,v14,v15,v16)
+-   [CockroachDB](https://www.cockroachlabs.com/) (v22.1,v22.2,v23.1)
 
 ## Third Party Library
 
@@ -97,7 +98,7 @@ Lupdo-postgres support numeric parameter with syntax `?`, you can escape it usin
 
 ## Kill Connection
 
-Lupdo-postgres support kill query.
+Lupdo-postgres support kill query (only for Postgress Database not CockroachDB).
 
 ## Postgres Returing
 

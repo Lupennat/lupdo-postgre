@@ -108,9 +108,9 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?::int8;');
         await stmt.execute([TypedBinding.create(PARAM_INTEGER, 1)]);
-        expect(stmt.fetchColumn(0).get()).toBe('1');
+        expect(stmt.fetchColumn(0).get()).toBe(1);
         await stmt.close();
     });
 
@@ -120,9 +120,9 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?::int8;');
         await stmt.execute([1]);
-        expect(stmt.fetchColumn(0).get()).toBe('1');
+        expect(stmt.fetchColumn(0).get()).toBe(1);
         await stmt.close();
     });
 
@@ -132,9 +132,9 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?::int8;');
         await stmt.execute([BigInt(9007199254740994)]);
-        expect(stmt.fetchColumn(0).get()).toBe('9007199254740994');
+        expect(stmt.fetchColumn(0).get()).toBe(BigInt(9007199254740994));
         await stmt.close();
     });
 
@@ -145,7 +145,7 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(10);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT ?');
+        stmt = await pdo.prepare('SELECT ?::text');
         await stmt.execute([date]);
 
         expect(new Date(stmt.fetchColumn(0).get() as string)).toEqual(date);
@@ -158,9 +158,9 @@ describe('Postgres Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(5);
         await stmt.close();
-        stmt = await pdo.prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?::boolean;');
         await stmt.execute([true]);
-        expect(stmt.fetchColumn(0).get()).toEqual('1');
+        expect(stmt.fetchColumn(0).get()).toEqual(1);
         await stmt.close();
     });
 
@@ -177,7 +177,7 @@ describe('Postgres Prepared Statement', () => {
     });
 
     it('Works Statement Buffer', async () => {
-        let stmt = await pdo.prepare('select ?');
+        let stmt = await pdo.prepare('select ?::bytea');
         const buffer = Buffer.from('Edmund');
         stmt.bindValue(1, buffer);
         await stmt.execute();

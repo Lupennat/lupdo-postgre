@@ -89,7 +89,7 @@ class PostgresDriver extends PdoDriver {
     protected async destroyConnection(connection: PostgresPoolConnection): Promise<void> {
         // get new connection to force kill pending
         const newConn = await this.createConnection();
-        await newConn.query('SELECT pg_cancel_backend(' + connection.processID + ')');
+        await newConn.query('SELECT pg_terminate_backend(' + connection.processID + ')');
         await connection.end();
         connection.removeAllListeners();
         await newConn.end();
