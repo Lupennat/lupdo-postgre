@@ -1,26 +1,27 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { CustomTypesConfig } from 'pg';
+
 import {
-    getTypeParser,
-    parseArrayBigint,
-    parseArrayBoolean,
-    parseArrayString,
-    parseBigint,
-    parseBoolean,
-    parseString,
-    setTypeParser,
-    typeParsers
+  getTypeParser,
+  parseArrayBigint,
+  parseArrayBoolean,
+  parseArrayString,
+  parseBigint,
+  parseBoolean,
+  parseString,
+  setTypeParser,
+  typeParsers,
 } from './utils';
 
 const textParsers = require('pg-types/lib/textParsers');
 const binaryParsers = require('pg-types/lib/binaryParsers');
 
 textParsers.init(function (oid: number, converter: Function): void {
-    typeParsers.text[oid] = converter;
+  typeParsers.text[oid] = converter;
 });
 
 binaryParsers.init(function (oid: number, converter: Function): void {
-    typeParsers.binary[oid] = converter;
+  typeParsers.binary[oid] = converter;
 });
 
 setTypeParser(20, parseBigint); // int8
@@ -71,5 +72,5 @@ setTypeParser(5039, parseArrayString); // pg_snapshot array
 setTypeParser(143, parseArrayString); // xml array
 
 export default {
-    getTypeParser
+  getTypeParser,
 } as CustomTypesConfig;

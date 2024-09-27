@@ -1,8 +1,8 @@
 <p align="center">
-	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
+ <a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
         <img src="https://img.shields.io/npm/v/lupdo-postgres?color=0476bc&label=" alt="NPM version">
     </a>
-	<a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
+ <a href="https://www.npmjs.com/package/lupdo-postgres" target="__blank">
         <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-postgres?color=3890aa&label=">
     </a>
     <a href="https://app.codecov.io/github/Lupennat/lupdo-postgres" target="__blank">
@@ -16,17 +16,18 @@
 # Lupdo-postgres
 
 [Lupdo](https://www.npmjs.com/package/lupdo) Driver For PostgreSql and CockroachDB.
+[Api](https://lupdo-postgres.lupennat.com/api/functions/createPostgresPdo.html)
 
 ## Supported Databases
 
--   [postgreSql](https://www.postgresql.org/) (v12,v13,v14,v15,v16)
--   [CockroachDB](https://www.cockroachlabs.com/) (v22.1,v22.2,v23.1)
+- [postgreSql](https://www.postgresql.org/) (v12,v13,v14,v15,v16)
+- [CockroachDB](https://www.cockroachlabs.com/) (v23.1,v23.2,v24.1,v24.2)
 
 ## Third Party Library
 
 Lupdo-postgres, under the hood, uses stable and performant npm packages:
 
--   [node-postgres](https://node-postgres.com/)
+- [node-postgres](https://node-postgres.com/)
 
 ## Usage
 
@@ -77,11 +78,11 @@ By default Ludpo-sqlite overrides user connection options with this:
 
 Lupdo postgres has a custom type parser
 
--   `boolean` are returned as number 1 or 0
--   `int8` are returned as number or BigInt when necessary
--   `bytea` are returned as Buffer
--   all others types are always returned as string
--   array are returned as Javascript `Array` of corresponding parsed type
+- `boolean` are returned as number 1 or 0
+- `int8` are returned as number or BigInt when necessary
+- `bytea` are returned as Buffer
+- all others types are always returned as string
+- array are returned as Javascript `Array` of corresponding parsed type
 
 ## Parameters Binding
 
