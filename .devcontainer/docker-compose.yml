@@ -1,0 +1,109 @@
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/typescript-node:18
+    volumes:
+      - ../:/workspaces/lupdo-postgres
+    command: sleep infinity
+
+  crdb231:
+    image: cockroachdb/cockroach:latest-v23.1
+    command: start-single-node --insecure
+    environment:
+      - COCKROACH_DATABASE=test_db
+      - COCKROACH_USER=lupdo
+    volumes:
+      - ./init/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+
+  crdb232:
+    image: cockroachdb/cockroach:latest-v23.2
+    command: start-single-node --insecure
+    environment:
+      - COCKROACH_DATABASE=test_db
+      - COCKROACH_USER=lupdo
+    volumes:
+      - ./init/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+
+  crdb241:
+    image: cockroachdb/cockroach:latest-v24.1
+    command: start-single-node --insecure
+    environment:
+      - COCKROACH_DATABASE=test_db
+      - COCKROACH_USER=lupdo
+    volumes:
+      - ./init/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+
+  crdb242:
+    image: cockroachdb/cockroach:latest-v24.2
+    command: start-single-node --insecure
+    environment:
+      - COCKROACH_DATABASE=test_db
+      - COCKROACH_USER=lupdo
+    volumes:
+      - ./init/crdb.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres12:
+    image: postgis/postgis:12-3.4-alpine
+    command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+    environment:
+      - PGUSER=ludpo
+      - PGPASSWORD=lupdos3cRet
+      - PGDATABASE=test_db
+      - POSTGRES_USER=lupdo
+      - POSTGRES_PASSWORD=lupdos3cRet
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./init/pg12.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres13:
+    image: postgis/postgis:13-3.4-alpine
+    command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+    environment:
+      - PGUSER=ludpo
+      - PGPASSWORD=lupdos3cRet
+      - PGDATABASE=test_db
+      - POSTGRES_USER=lupdo
+      - POSTGRES_PASSWORD=lupdos3cRet
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./init/pg13.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres14:
+    image: postgis/postgis:14-3.4-alpine
+    command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+    environment:
+      - PGUSER=ludpo
+      - PGPASSWORD=lupdos3cRet
+      - PGDATABASE=test_db
+      - POSTGRES_USER=lupdo
+      - POSTGRES_PASSWORD=lupdos3cRet
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./init/pg13.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres15:
+    image: postgis/postgis:15-3.4-alpine
+    command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+    environment:
+      - PGUSER=ludpo
+      - PGPASSWORD=lupdos3cRet
+      - PGDATABASE=test_db
+      - POSTGRES_USER=lupdo
+      - POSTGRES_PASSWORD=lupdos3cRet
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./init/pg13.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres16:
+    image: postgis/postgis:16-3.4-alpine
+    command: '-c full_page_writes=off -c fsync=off -c synchronous_commit=off'
+    ports:
+      - '25436:5432'
+    environment:
+      - PGUSER=ludpo
+      - PGPASSWORD=lupdos3cRet
+      - PGDATABASE=test_db
+      - POSTGRES_USER=lupdo
+      - POSTGRES_PASSWORD=lupdos3cRet
+      - POSTGRES_DB=test_db
+    volumes:
+      - ./init/pg13.sql:/docker-entrypoint-initdb.d/init.sql

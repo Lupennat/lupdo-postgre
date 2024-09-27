@@ -7,51 +7,95 @@ on:
 
 jobs:
   build:
+    name: Run build with ${{ matrix.node-version }}
     runs-on: ubuntu-latest
-
     strategy:
-      fail-fast: false
       matrix:
-        node-version: [18.x, 16.x]
-        database-type: [crdb221, crdb222, crdb231, postgres12, postgres13, postgres14, postgres15, postgres16]
-
+        node-version: [22.x, 20.x, 18.x]
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Lint code
+        run: npm run lint
+        env:
+          CI: true
+
+      - name: Unit test
+        run: npm run test:unit
+        env:
+          CI: true
+
+  integration:
+    name: Run integration tests with ${{ matrix.database-type }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database-type:
+          [
+            postgres16,
+            postgres15,
+            postgres14,
+            postgres13,
+            postgres12,
+            crdb242,
+            crdb241,
+            crdb232,
+            crdb231,
+          ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          CI: true
+
       - name: Start Database(s)
         run: |
-            docker-compose \
-              --file "docker-compose.yml" \
-              up \
-                --detach \
-                --build \
-                "${{ matrix.database-type }}"
-
-      - name: Run npm install
-        run: npm ci
+          docker compose \
+            --file ".devcontainer/docker-compose.yml" \
+            --file ".devcontainer/docker-compose-ci.yml" \
+            up \
+              --detach \
+              --build \
+              "${{ matrix.database-type }}"
 
       - name: Initialize Database
         run: |
-            docker-compose \
-              --file "docker-compose.yml" \
-              up \
-                "wait${{ matrix.database-type }}"
+          docker compose \
+            --file ".devcontainer/docker-compose.yml" \
+            --file ".devcontainer/docker-compose-ci.yml" \
+            up \
+              "wait${{ matrix.database-type }}"
 
       - name: Build and test
         run: |
-          npm run build
-          npm run test:db
+          npm run test:integration
         env:
           CI: true
           DB: ${{ matrix.database-type }}
 
       - name: Stop Database(s)
         run: |
-          docker-compose \
-            --file "docker-compose.yml" \
+          docker compose \
+            --file ".devcontainer/docker-compose.yml" \
+            --file ".devcontainer/docker-compose-ci.yml" \
             down
